@@ -24,16 +24,6 @@ To set up on multiple environments, such as dev, stage or prod, we do as follows
    $ cp .env.example .env.dev # or .env.stage, etc
 ```
 
-## Config settings .env for sending a notification when a user registers, forgets password or changes password
-
-```
-   EMAIL_HOST=smtp.mailtrap.io
-   EMAIL_PORT=2525
-   EMAIL_AUTH_USER=[:user]
-   EMAIL_AUTH_PASSWORD=[:password]
-   EMAIL_DEBUG=true
-   EMAIL_LOGGER=true
-```
 
 ## Config settings .env to connect MySQL
 

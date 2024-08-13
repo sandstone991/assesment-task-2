@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AppModule } from './../../src/app.module';
-import { MailerService } from '../../src/shared/mailer/mailer.service';
 import {
   BadRequestException,
   HttpStatus,
@@ -36,10 +35,6 @@ describe('App (e2e)', () => {
         },
       ],
     })
-      .overrideProvider(MailerService)
-      .useValue({
-        sendMail: jest.fn(() => true),
-      })
       .compile();
 
     app = moduleFixture.createNestApplication<NestFastifyApplication>(

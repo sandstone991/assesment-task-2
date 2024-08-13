@@ -5,7 +5,6 @@ import { Users } from '../../users/models/users.model';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { HashingService } from '../../shared/hashing/hashing.service';
-import { MailerService } from '../../shared/mailer/mailer.service';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 
@@ -30,12 +29,7 @@ describe('RegisterService', () => {
             create: jest.fn().mockResolvedValue(registerUserDto),
           },
         },
-        {
-          provide: MailerService,
-          useValue: {
-            sendMail: jest.fn(),
-          },
-        },
+
         {
           provide: ConfigService,
           useValue: {
