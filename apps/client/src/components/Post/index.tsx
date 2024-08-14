@@ -379,6 +379,12 @@ export const Post = (props: PostProps) => {
           ));
         })}
       </div>
+      {
+        <div>
+          {comments.isFetching && <p>Loading...</p>}
+          {comments.isError && <p>Error: {comments.error.message}</p>}
+        </div>
+      }
       {commentsLeft > 0 && !hideComments ? (
         <div className="flex ">
           <Button

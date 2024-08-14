@@ -140,6 +140,10 @@ export const Home = () => {
             </div>
           ))}
         </div>
+        <div>
+          {postsQuery.isFetching && <p>Loading...</p>}
+          {postsQuery.isError && <p>Error: {postsQuery.error.message}</p>}
+        </div>
       </div>
       {postsQuery.hasNextPage && (
         <Button variant="outline" onClick={() => postsQuery.fetchNextPage()}>
