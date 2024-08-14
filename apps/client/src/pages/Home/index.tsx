@@ -2,7 +2,6 @@ import { Post } from '@/components/Post';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
-import { useIsStillAuthed } from '@/hooks/useIsStillAuthed';
 import { AuthedClient, client } from '@/lib/client';
 import { ApiPost } from '@/lib/interface';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -59,7 +58,7 @@ export const Home = () => {
   });
   return (
     <div>
-      <div className="w-full h-fit p-2 border-b">
+      <div className="h-fit w-full border-b p-2">
         {!isAuthed ? (
           <>
             <Button variant="outline" asChild>
@@ -91,7 +90,7 @@ export const Home = () => {
       <div className="p-4">
         {isAuthed && (
           <form
-            className="m-auto w-fit p-4 shadow-md my-4"
+            className="m-auto my-4 w-fit p-4 shadow-md"
             onSubmit={handleSubmit((data) => {
               createPostMutation.mutate(data);
             })}

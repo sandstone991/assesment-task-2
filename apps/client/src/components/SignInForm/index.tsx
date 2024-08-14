@@ -137,9 +137,7 @@ export function SignInForm({ className, ...props }: UserAuthFormProps) {
           >
             Sign In
           </button>
-          <Link  to="../signup">
-            Sign Up
-          </Link>
+          <Link to="../signup">Sign Up</Link>
         </div>
       </form>
     </div>

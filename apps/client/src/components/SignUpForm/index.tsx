@@ -161,9 +161,7 @@ export function SignUpForm({ className, ...props }: UserAuthFormProps) {
             {signupMutatuion.isPending && <div>Loading</div>}
             Sign Up
           </button>
-          <Link to="../signin" >
-            Sign in
-          </Link>
+          <Link to="../signin">Sign in</Link>
         </div>
       </form>
     </div>

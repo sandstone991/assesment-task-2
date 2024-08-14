@@ -29,7 +29,7 @@ import { AuthedClient, client } from '@/lib/client';
 import { ApiPost } from '@/lib/interface';
 import { cn } from '@/lib/utils';
 import { PopoverClose } from '@radix-ui/react-popover';
-import {isNumber} from "lodash-es"
+import { isNumber } from 'lodash-es';
 export type PostProps = {
   id: number;
   user: {
