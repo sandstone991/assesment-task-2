@@ -2,7 +2,6 @@ import { PostDto } from '../dto/post.dto';
 import { Post } from '../models/posts.model';
 export interface PostsRepository {
   findRoots(): Promise<Post[]>;
-  findAllChildren(id: number): Promise<Post[]>;
   getChildrenPage(
     id: number,
     page: number,

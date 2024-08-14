@@ -1,3 +1,4 @@
+import { ApiUser } from '@/lib/interface';
 import { useEffect, useState } from 'react';
 
 export const useAuth = () => {
@@ -27,5 +28,10 @@ export const useAuth = () => {
       window.removeEventListener('storage', storageHandler);
     };
   }, []);
-  return isAuthed;
+  return {
+    isAuthed,
+    accessToken,
+    refreshToken,
+    user: user ? (JSON.parse(user) as ApiUser) : null
+  };
 };

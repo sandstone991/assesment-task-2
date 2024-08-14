@@ -10,6 +10,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   TreeLevelColumn,
+  Index,
 } from 'typeorm';
 
 @Entity()
@@ -28,7 +29,7 @@ export class Post {
 
   @TreeChildren()
   children: Post[];
-
+  
   @TreeParent({ onDelete: 'CASCADE' })
   parent: Post;
 

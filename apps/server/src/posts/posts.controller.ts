@@ -109,16 +109,7 @@ export class PostsController {
     }
     await this.postsService.delete(Number(postId));
   }
-  @AuthGuard(AuthType.None)
-  @Get('/:postId/children')
-  @ApiResponse({
-    status: 200,
-    description: 'Get all children of a Post',
-  })
-  @ApiNotFoundResponse({ status: 400, description: 'Post not found' })
-  public async findChildren(@Param('postId') postId: string): Promise<Posts[]> {
-    return this.postsService.findChildren(Number(postId));
-  }
+
   @AuthGuard(AuthType.None)
   @Get('/:postId/parent')
   @ApiResponse({
@@ -154,5 +145,17 @@ export class PostsController {
     @Param('page') page: string,
   ): Promise<{ posts: Posts[]; left: number }> {
     return this.postsService.getChildrenPage(Number(postId), Number(page));
+  }
+  @AuthGuard(AuthType.None)
+  @Get('/page/:page')
+  @ApiResponse({
+    status: 200,
+    description: 'Get roots of Posts by page',
+  })
+  @ApiNotFoundResponse({ status: 400, description: 'Posts not found' })
+  public async getRootsPage(
+    @Param('page') page: string,
+  ): Promise<{ posts: Posts[]; left: number }> {
+    return this.postsService.getRootsPage(Number(page));
   }
 }

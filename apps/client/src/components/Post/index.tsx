@@ -5,6 +5,7 @@ import { Button } from '../ui/button';
 import {
   CircleDivideIcon,
   CircleXIcon,
+  Edit2,
   MinusCircleIcon,
   MinusIcon,
   PlusCircleIcon,
@@ -22,16 +23,20 @@ import {
   UseMutationResult,
   useQuery
 } from '@tanstack/react-query';
-import { isNumber } from 'lodash-es';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthedClient, client } from '@/lib/client';
 import { ApiPost } from '@/lib/interface';
 import { cn } from '@/lib/utils';
+import { PopoverClose } from '@radix-ui/react-popover';
 
 export type PostProps = {
   id: number;
-  user: string;
+  user: {
+    name: string;
+    id: number;
+    email: string;
+  };
   selfNumber: number;
   date: string;
   operation?: '+' | '-' | '*' | '/' | null;
@@ -64,70 +69,210 @@ const dataFormat = new Intl.DateTimeFormat('en-US', {
   dateStyle: 'short',
   timeStyle: 'short'
 });
+
+const EditPostSchema = z.union([
+  z.object({
+    isRoot: z.literal(false),
+    number: z.number(),
+    operator: z.union([
+      z.literal('+'),
+      z.literal('-'),
+      z.literal('*'),
+      z.literal('/')
+    ])
+  }),
+  z.object({
+    isRoot: z.literal(true),
+    number: z.number(),
+    operator: z.literal('NA')
+  })
+]);
+type EditPostFormData = z.infer<typeof EditPostSchema>;
+function EditPostForm({
+  mutation,
+  defaultValues
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mutation: UseMutationResult<any, any, any, any>;
+  defaultValues: {
+    isRoot: boolean;
+    number: number;
+    operation: '+' | '-' | '*' | '/' | 'NA';
+  };
+}) {
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors }
+  } = useForm<EditPostFormData>({
+    defaultValues: defaultValues
+  });
+  return (
+    <form
+      onSubmit={handleSubmit((data) => {
+        if (data.operator === '/' && data.number === 0) {
+          setError('number', { message: 'Cannot divide by 0' });
+          return;
+        }
+        mutation.mutate({
+          number: data.number,
+          operator: data.operator === 'NA' ? undefined : data.operator
+        });
+      })}
+    >
+      <div className="grid gap-2">
+        <div className="grid gap-1">
+          <Label className="sr-only" htmlFor="number">
+            Number
+          </Label>
+          <Input
+            id="number"
+            placeholder="Enter a number"
+            type="number"
+            disabled={mutation.isPending}
+            {...register('number')}
+          />
+          {errors?.number && (
+            <p className="px-1 text-xs text-red-600">{errors.number.message}</p>
+          )}
+        </div>
+        {defaultValues.isRoot ? (
+          <Input
+            type="hidden"
+            value={defaultValues.operation}
+            id="operator"
+            {...register('operator')}
+            disabled
+          />
+        ) : (
+          <div className="grid gap-1">
+            <Label className="sr-only" htmlFor="operator">
+              Operator
+            </Label>
+            <select
+              id="operator"
+              defaultValue={defaultValues.operation}
+              {...register('operator')}
+            >
+              <option value="+">+</option>
+              <option value="-">-</option>
+              <option value="*">*</option>
+              <option value="/">/</option>
+            </select>
+            {errors?.operator && (
+              <p className="px-1 text-xs text-red-600">
+                {errors.operator.message}
+              </p>
+            )}
+          </div>
+        )}
+        <PopoverClose asChild>
+          <Button
+            type="submit"
+            className="p-2"
+            disabled={mutation.isPending}
+            aria-label={`Submit ${defaultValues.operation}`}
+          >
+            Submit
+          </Button>
+        </PopoverClose>
+      </div>
+    </form>
+  );
+}
+
 export const Post = (props: PostProps) => {
-  const isAuthed = useAuth();
-  const isRoot = !props.parentNumber && !props.operation;
-  const commentMutatuion = useMutation({
+  const { isAuthed, user } = useAuth();
+  const [post, setPost] = useState(() => props);
+  const isUserPost = user && user.id === post.user.id;
+  const isRoot = !post.parentNumber && !post.operation;
+
+  const commentMutation = useMutation({
     mutationFn: async (data: OperationFormData) => {
       const res = await AuthedClient.post('posts', {
         json: {
           number: data.number,
           operator: data.operator,
-          parentPostId: props.id
+          parentPostId: post.id
         }
       });
       return res.json();
     },
     onSuccess: () => {
       commentCount.refetch();
+      comments.refetch();
     }
   });
+  const [left, setLeft] = useState<null | number>(null);
   const commentCount = useQuery({
-    queryKey: ['commentCount', props.id],
+    queryKey: ['commentCount', post.id],
     queryFn: async () => {
-      const response = await client(`posts/${props.id}/children/count`);
+      const response = await client(`posts/${post.id}/children/count`);
       return (await response.json()) as { count: number };
     }
   });
+
   const [initialShowMore, setInitialShowMore] = useState(false);
   const [hideComments, setHideComments] = useState(false);
-  const [page, setPage] = useState(0);
   const comments = useInfiniteQuery({
-    queryKey: ['comments', props.id],
-    queryFn: async () => {
-      const response = await client(`posts/${props.id}/children/page/${page}`);
-      return (await response.json()) as { posts: ApiPost[]; left: number };
+    queryKey: ['comments', post.id],
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await client(
+        `posts/${post.id}/children/page/${pageParam}`
+      );
+      const data = (await response.json()) as {
+        posts: ApiPost[];
+        left: number;
+      };
+      setLeft(data.left);
+      return data;
     },
     initialPageParam: 0,
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: (lastPage, allPages) => {
       if (lastPage.left > 0) {
-        setPage(page + 1);
-        return page + 1;
+        return allPages.length;
       }
     },
     enabled: initialShowMore
   });
-  let number = props.selfNumber;
-  if (props.parentNumber && props.operation) {
-    switch (props.operation) {
+  let number = post.selfNumber;
+  if (post.parentNumber && post.operation) {
+    switch (post.operation) {
       case '+':
-        number = number + props.parentNumber;
+        number = number + post.parentNumber;
         break;
       case '-':
-        number = props.parentNumber - number;
+        number = post.parentNumber - number;
         break;
       case '*':
-        number = number * props.parentNumber;
+        number = number * post.parentNumber;
         break;
       case '/':
-        number = props.parentNumber / number;
+        number = post.parentNumber / number;
         break;
     }
   }
-  const commentsLeft = isNumber(comments.data?.pages[page].left)
-    ? comments.data!.pages[page]!.left
-    : commentCount.data?.count ?? 0;
-
+  const editPostMutation = useMutation({
+    mutationFn: async (data: FormData) => {
+      const res = await AuthedClient.put(`posts/${post.id}`, {
+        json: data
+      });
+      return (await res.json()) as ApiPost;
+    },
+    onSuccess: (data) => {
+      setPost({
+        date: data.createdAt,
+        id: data.id,
+        operation: data.operation,
+        parentNumber: props.parentNumber,
+        selfNumber: data.number,
+        user: data.user
+      });
+      comments.refetch();
+    }
+  });
+  const commentsLeft = left ?? commentCount.data?.count ?? 0;
   return (
     <div
       className={cn('relative flex flex-col gap-1', {
@@ -135,24 +280,45 @@ export const Post = (props: PostProps) => {
         'pl-4 border-l': !isRoot
       })}
     >
-      <div className="flex flex-row items-center gap-2">
-        <Avatar>
-          <AvatarImage src="https://avatar.iran.liara.run/public" />
-          <AvatarFallback>{props.user.slice(0, 2)}</AvatarFallback>
-        </Avatar>
-        <div className="flex flex-col">
-          <div>
-            <p>{props.user}</p>
+      <div className="flex flex-row justify-between">
+        <div className="flex flex-row items-center gap-2">
+          <Avatar>
+            <AvatarImage src="https://avatar.iran.liara.run/public" />
+            <AvatarFallback>{post.user.name.slice(0, 2)}</AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <div>
+              <p>{post.user.name}</p>
+            </div>
+            <Link to={`/post/${post.id}`}>
+              <p>{dataFormat.format(new Date(post.date))}</p>
+            </Link>
           </div>
-          <Link to={`/post/${props.id}`}>
-            <p>{dataFormat.format(new Date(props.date))}</p>
-          </Link>
         </div>
+        {isUserPost ? (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost">
+                <Edit2 size={24} />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent>
+              <EditPostForm
+                mutation={editPostMutation}
+                defaultValues={{
+                  isRoot,
+                  number: post.selfNumber,
+                  operation: post.operation ?? 'NA'
+                }}
+              />
+            </PopoverContent>
+          </Popover>
+        ) : null}
       </div>
       <div className="px-4">
-        {props.operation ? (
+        {post.operation ? (
           <div>
-            {`${props.parentNumber} ${props.operation} ${props.selfNumber} = `}{' '}
+            {`${post.parentNumber} ${post.operation} ${post.selfNumber} = `}{' '}
           </div>
         ) : null}
         <Badge>{number}</Badge>
@@ -172,7 +338,7 @@ export const Post = (props: PostProps) => {
               </PopoverTrigger>
               <PopoverContent>
                 <OperationForm
-                  mutation={commentMutatuion}
+                  mutation={commentMutation}
                   operation={operation.operation}
                   parentNumber={number}
                 />
@@ -206,14 +372,14 @@ export const Post = (props: PostProps) => {
               date={post.createdAt}
               key={post.id}
               id={post.id}
-              user={post.user.name}
+              user={post.user}
               parentNumber={number}
               operation={post.operation}
             />
           ));
         })}
       </div>
-      {commentsLeft > 0 ? (
+      {commentsLeft > 0 && !hideComments ? (
         <div className="flex ">
           <Button
             onClick={() => {
@@ -227,11 +393,7 @@ export const Post = (props: PostProps) => {
           >
             <PlusIcon size={24} />
           </Button>
-          <Badge>
-            {isNumber(comments.data?.pages[page].left)
-              ? comments.data?.pages[page].left
-              : commentCount.data?.count ?? 0}
-          </Badge>
+          <Badge>{commentsLeft}</Badge>
         </div>
       ) : null}
     </div>
@@ -302,14 +464,16 @@ function OperationForm({
           {...register('operator')}
           disabled
         />
-        <Button
-          type="submit"
-          className="p-2"
-          disabled={mutation.isPending}
-          aria-label={`Submit ${operation}`}
-        >
-          Submit
-        </Button>
+        <PopoverClose asChild>
+          <Button
+            type="submit"
+            className="p-2"
+            disabled={mutation.isPending}
+            aria-label={`Submit ${operation}`}
+          >
+            Submit
+          </Button>
+        </PopoverClose>
       </div>
     </form>
   );

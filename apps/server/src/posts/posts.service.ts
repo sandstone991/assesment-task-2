@@ -58,8 +58,8 @@ export class PostsService {
   public async findChildrenCount(id: number): Promise<number> {
     return await this.postsRepository.findChildrenCount(id);
   }
-  public async findChildren(id: number): Promise<Post[]> {
-    return await this.postsRepository.findAllChildren(id);
+  public async getRootsPage(page: number): Promise<{ posts: Post[]; left: number }> {
+    return await this.postsRepository.getRootsPage(page);
   }
   public async findParent(id: number): Promise<Post> {
     return await this.postsRepository.findParent(id);
