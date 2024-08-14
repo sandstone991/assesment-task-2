@@ -186,7 +186,7 @@ export const Post = (props: PostProps) => {
   const { isAuthed, user } = useAuth();
   const [post, setPost] = useState(() => props);
   const isUserPost = user && user.id === post.user.id;
-  const isRoot = !post.parentNumber && !post.operation;
+  const isRoot = !props.parentNumber && !post.operation;
 
   const commentMutation = useMutation({
     mutationFn: async (data: OperationFormData) => {
@@ -237,19 +237,19 @@ export const Post = (props: PostProps) => {
     enabled: initialShowMore
   });
   let number = post.selfNumber;
-  if (post.parentNumber && post.operation) {
+  if (props.parentNumber && post.operation) {
     switch (post.operation) {
       case '+':
-        number = number + post.parentNumber;
+        number = number + props.parentNumber;
         break;
       case '-':
-        number = post.parentNumber - number;
+        number = props.parentNumber - number;
         break;
       case '*':
-        number = number * post.parentNumber;
+        number = number * props.parentNumber;
         break;
       case '/':
-        number = post.parentNumber / number;
+        number = props.parentNumber / number;
         break;
     }
   }
@@ -318,7 +318,7 @@ export const Post = (props: PostProps) => {
       <div className="px-4">
         {post.operation ? (
           <div>
-            {`${post.parentNumber} ${post.operation} ${post.selfNumber} = `}{' '}
+            {`${props.parentNumber} ${post.operation} ${post.selfNumber} = `}{' '}
           </div>
         ) : null}
         <Badge>{number}</Badge>
