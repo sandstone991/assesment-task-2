@@ -8,11 +8,8 @@ const configService = new ConfigService();
 
 export default new DataSource({
   type: 'postgres',
-  host: configService.get<string>('TYPEORM_HOST'),
-  port: configService.get<number>('TYPEORM_PORT'),
-  username: configService.get<string>('TYPEORM_USERNAME'),
-  password: configService.get<string>('TYPEORM_PASSWORD'),
-  database: configService.get<string>('TYPEORM_DATABASE'),
+  url: configService.get<string>('TYPEORM_DB_URL'),
+  ssl: !!configService.get<boolean>('TYPEORM_DB_SSL'),
   entities: [],
   migrations: [],
 });

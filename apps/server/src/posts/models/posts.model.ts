@@ -1,4 +1,4 @@
-import { Users as User } from '@/users/models/users.model';
+import { Users as User } from '../../users/models/users.model';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -9,8 +9,7 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
-  TreeLevelColumn,
-  Index,
+ 
 } from 'typeorm';
 
 @Entity()

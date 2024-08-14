@@ -1,9 +1,9 @@
 import { PostsRepository } from '../posts.repository.interface';
 import { Repository, TreeRepository } from 'typeorm';
 
-import { Post } from '@/posts/models/posts.model';
-import { PostDto } from '@/posts/dto/post.dto';
-import { PostUpdateDto } from '@/posts/dto/post-update.dto';
+import { Post } from '../../models/posts.model';
+import { PostDto } from '../../dto/post.dto';
+import { PostUpdateDto } from '../../dto/post-update.dto';
 
 export class PostsTypeOrmRepository implements PostsRepository {
   constructor(

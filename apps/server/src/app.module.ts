@@ -16,11 +16,7 @@ import { PostsModule } from './posts/posts.module';
       isGlobal: true,
       envFilePath: ['.env', '.env.dev', '.env.stage', '.env.prod'],
       validationSchema: Yup.object({
-        TYPEORM_HOST: Yup.string().required(),
-        TYPEORM_PORT: Yup.number().default(3306),
-        TYPEORM_USERNAME: Yup.string().required(),
-        TYPEORM_PASSWORD: Yup.string().required(),
-        TYPEORM_DATABASE: Yup.string().required(),
+          TYPEORM_DB_URL: Yup.string().required(),
       }),
     }),
     ThrottlerModule.forRootAsync({
@@ -38,11 +34,8 @@ import { PostsModule } from './posts/posts.module';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
-        host: config.get<string>('TYPEORM_HOST'),
-        port: config.get<number>('TYPEORM_PORT'),
-        username: config.get<string>('TYPEORM_USERNAME'),
-        password: config.get<string>('TYPEORM_PASSWORD'),
-        database: config.get<string>('TYPEORM_DATABASE'),
+        url: config.get<string>('TYPEORM_DB_URL'),
+        ssl: !!config.get<boolean>('TYPEORM_DB_SSL'),
         synchronize: true,
         entities: [__dirname + '/**/*.{model,entity}.{ts,js}'],
         migrations: ['dist/migrations/**/*.js'],
