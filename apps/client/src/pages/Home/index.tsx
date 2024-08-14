@@ -7,7 +7,7 @@ import { AuthedClient, client } from '@/lib/client';
 import { ApiPost } from '@/lib/interface';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Label } from '@radix-ui/react-label';
-import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -20,6 +20,7 @@ type FormData = z.infer<typeof createPostSchema>;
 
 export const Home = () => {
   useIsStillAuthed();
+  const navigate = useNavigate();
   const { isAuthed } = useAuth();
   const postsQuery = useInfiniteQuery({
     queryKey: ['posts'],
@@ -38,12 +39,15 @@ export const Home = () => {
     initialPageParam: 0
   });
   const createPostMutation = useMutation({
-    onMutate: async (data: FormData) => {
+    mutationFn: async (data: FormData) => {
       try {
         await AuthedClient.post('posts', { json: data });
       } catch (e) {
         console.error(e);
       }
+    },
+    onSuccess: () => {
+      navigate(0);
     }
   });
   const {
@@ -53,7 +57,6 @@ export const Home = () => {
   } = useForm<FormData>({
     resolver: zodResolver(createPostSchema)
   });
-  const navigate = useNavigate();
   return (
     <div>
       <div className="w-full h-fit p-2 border-b">
