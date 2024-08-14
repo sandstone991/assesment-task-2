@@ -48,7 +48,7 @@ export class LoginService {
         );
       }
 
-      return await this.generateTokens(user);
+      return await this.generateTokens(user as Users) ;
     } catch (err) {
       throw new HttpException(err, HttpStatus.BAD_REQUEST);
     }

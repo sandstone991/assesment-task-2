@@ -7,6 +7,8 @@ import { UsersModule } from './users/users.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { IamModule } from './iam/iam.module';
 import * as Yup from 'yup';
+import { PostsModule } from './posts/posts.module';
+
 
 @Module({
   imports: [
@@ -53,6 +55,7 @@ import * as Yup from 'yup';
     }),
     IamModule,
     UsersModule,
+    PostsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

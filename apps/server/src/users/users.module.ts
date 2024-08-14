@@ -8,7 +8,7 @@ import { HashingService } from '../shared/hashing/hashing.service';
 import { provideUsersRepository } from './repositories/users.repository.provider';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Users])],
+  imports: [TypeOrmModule.forFeature([Users]),],
   controllers: [UsersController],
   providers: [
     {

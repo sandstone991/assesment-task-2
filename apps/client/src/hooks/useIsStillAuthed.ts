@@ -28,14 +28,17 @@ export const useIsStillAuthed = () => {
         localStorage.setItem('refreshToken', data.refreshToken);
         return data;
       } catch (e) {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        navigate('../signin', {
-          state: {
-            message: 'Session expired, please sign in again'
-          }
-        });
+        if (accessToken) {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          navigate('../signin', {
+            state: {
+              message: 'Session expired, please sign in again'
+            }
+          });
+        }
+        return false;
       }
     }
   });

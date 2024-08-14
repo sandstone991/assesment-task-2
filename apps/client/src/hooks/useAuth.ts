@@ -26,6 +26,6 @@ export const useAuth = () => {
     return () => {
       window.removeEventListener('storage', storageHandler);
     };
-  });
+  }, []);
   return isAuthed;
 };
