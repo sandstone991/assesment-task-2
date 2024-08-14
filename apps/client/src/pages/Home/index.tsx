@@ -19,7 +19,7 @@ const createPostSchema = z.object({
 type FormData = z.infer<typeof createPostSchema>;
 
 export const Home = () => {
-  useIsStillAuthed();
+  // useIsStillAuthed();
   const navigate = useNavigate();
   const { isAuthed } = useAuth();
   const postsQuery = useInfiniteQuery({

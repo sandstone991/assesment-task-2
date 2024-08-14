@@ -135,7 +135,6 @@ export function SignInForm({ className, ...props }: UserAuthFormProps) {
             className={cn(buttonVariants())}
             disabled={loginMutation.isPending}
           >
-            {loginMutation.isPending && <div>Loading</div>}
             Sign In
           </button>
           <Link  to="../signup">
