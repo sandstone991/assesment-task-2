@@ -42,7 +42,19 @@ export class PostsTypeOrmRepository implements PostsRepository {
         },
       },
     });
-    const ancestors = await this.postsTreeRepository.findAncestors(post);
+    let ancestorsTree = await this.postsTreeRepository.findAncestorsTree(post);
+    let ancestors:Post[] = []
+    ancestors.push(post)
+    while(true){
+      if(ancestorsTree.parent){
+        ancestors.push(ancestorsTree.parent)
+        ancestorsTree = ancestorsTree.parent
+      }else{
+        ancestors.push(ancestorsTree)
+        break;
+      }
+    }
+    ancestors = ancestors.reverse()
     let number = ancestors[0].number;
     for (let i = 1; i < ancestors.length; i++) {
       const left = ancestors[i];
