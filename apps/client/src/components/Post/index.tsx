@@ -29,7 +29,7 @@ import { AuthedClient, client } from '@/lib/client';
 import { ApiPost } from '@/lib/interface';
 import { cn } from '@/lib/utils';
 import { PopoverClose } from '@radix-ui/react-popover';
-
+import {isNumber} from "lodash-es"
 export type PostProps = {
   id: number;
   user: {
@@ -186,7 +186,7 @@ export const Post = (props: PostProps) => {
   const { isAuthed, user } = useAuth();
   const [post, setPost] = useState(() => props);
   const isUserPost = user && user.id === post.user.id;
-  const isRoot = !props.parentNumber && !post.operation;
+  const isRoot = !isNumber(props.parentNumber) && !post.operation;
 
   const commentMutation = useMutation({
     mutationFn: async (data: OperationFormData) => {
@@ -237,19 +237,19 @@ export const Post = (props: PostProps) => {
     enabled: initialShowMore
   });
   let number = post.selfNumber;
-  if (props.parentNumber && post.operation) {
+  if (isNumber(props.parentNumber) && post.operation) {
     switch (post.operation) {
       case '+':
-        number = number + props.parentNumber;
+        number = number + props.parentNumber!;
         break;
       case '-':
-        number = props.parentNumber - number;
+        number = props.parentNumber! - number;
         break;
       case '*':
-        number = number * props.parentNumber;
+        number = number * props.parentNumber!;
         break;
       case '/':
-        number = props.parentNumber / number;
+        number = props.parentNumber! / number;
         break;
     }
   }
